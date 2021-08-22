@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import logo from './logo.svg';
 import styles from './App.module.scss';
 import Mensaje from './mensaje/Mensaje';
+import CountryController from './networking/controllers/countryController';
+import Country from './models/country';
 
 function App() {
   const var1 = 'Var1';
@@ -13,8 +14,19 @@ function App() {
   useEffect(() => {
     const getPaises = async () => {
       // Llamo al endpoint https://restcountries.eu/rest/v2/all?fields=name
-      const listaPaises = await axios.get('https://restcountries.eu/rest/v2/all?fields=name');
-      setPaises(listaPaises.data);
+      let listaPaises;
+      try {
+        listaPaises = await CountryController.getCountries();
+      } catch (error) {
+        return error;
+      }
+      if (listaPaises) {
+        const miPais = new Country(listaPaises.find((p) => p.name === 'Uruguay'));
+        const nombre = miPais.name;
+        console.log(nombre);
+        return setPaises(listaPaises);
+      }
+      return null;
     };
     getPaises();
   }, []);
